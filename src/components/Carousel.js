@@ -1,84 +1,90 @@
 "use client";
 import { useState } from "react";
-import { motion } from "framer-motion";
+import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
+import ImagePlaceholder from "@/components/ui/ImagePlaceholder";
+import Icon from "@/components/ui/Icon";
 
-const videos = [
-  "https://www.youtube.com/embed/dQw4w9WgXcQ",
-  "https://www.youtube.com/embed/9bZkp7q19f0",
-  "https://www.youtube.com/embed/3JZ_D3ELwOQ",
-  "https://www.youtube.com/embed/L_jWHffIx5E",
-  "https://www.youtube.com/embed/CevxZvSJLk8",
-];
+const ease = [0.22, 1, 0.36, 1];
 
-const ITEMS_PER_VIEW = 3;
-const ITEM_WIDTH_PERCENT = 100 / ITEMS_PER_VIEW; // = 33.333%
-
-export default function Carousel() {
+// Featured-work carousel: one prominent project flanked by the previous and
+// next ones. items: [{ project, image }]
+export default function Carousel({ items }) {
   const [index, setIndex] = useState(0);
-  const totalItems = videos.length;
+  const total = items.length;
+  const at = (offset) => items[(index + offset + total) % total];
+  const current = at(0);
+  const previous = at(-1);
+  const next = at(1);
+  const go = (step) => setIndex((i) => (i + step + total) % total);
 
-  const handleNext = () => {
-    setIndex((prev) => (prev + 1) % totalItems);
-  };
-
-  const handlePrev = () => {
-    setIndex((prev) => (prev - 1 + totalItems) % totalItems);
-  };
-
-  // generate the current visible set (3 videos sliding one by one)
-  const getVisibleItems = () => {
-    return Array.from({ length: ITEMS_PER_VIEW }).map((_, i) => {
-      const videoIndex = (index + i) % totalItems;
-      return videos[videoIndex];
-    });
-  };
-
-  const visibleVideos = getVisibleItems();
+  const sideTile = (item, step, className) => (
+    <button
+      type="button"
+      onClick={() => go(step)}
+      aria-label={`Show ${item.project.title}`}
+      className={`group relative hidden overflow-hidden lg:block ${className}`}
+    >
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.span key={item.project.slug} className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}>
+          <ImagePlaceholder src={item.image} alt="" sizes="20vw" className="absolute inset-0" imgClassName="transition-transform duration-[1400ms] group-hover:scale-105" />
+          <span className="absolute inset-0 bg-ink/35 transition-colors duration-500 group-hover:bg-ink/10" />
+        </motion.span>
+      </AnimatePresence>
+    </button>
+  );
 
   return (
-    <div className="relative w-full max-w-6xl mx-auto">
-      {/* Video Track */}
-      <div className="overflow-hidden">
-        <motion.div
-          key={index} // triggers re-animation on index change
-          className="flex gap-4"
-          initial={{ x: "100%", opacity: 0 }}
-          animate={{ x: "0%", opacity: 1 }}
-          exit={{ x: "-100%", opacity: 0 }}
-          transition={{ duration: 0.5, ease: "easeInOut" }}
-        >
-          {visibleVideos.map((url, i) => (
-            <div
-              key={i}
-              className="w-1/3 shrink-0 bg-black rounded-xl overflow-hidden shadow-lg"
-            >
-              <iframe
-                src={url}
-                title={`YouTube Video ${index + i}`}
-                className="w-full h-48 md:h-60"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              ></iframe>
-            </div>
-          ))}
-        </motion.div>
+    <div className="grid grid-cols-1 items-center gap-0 lg:grid-cols-[17%_1fr_17%]" aria-roledescription="carousel" aria-label="Featured works">
+      {sideTile(previous, -1, "mt-16 aspect-[1/1]")}
+
+      <div className="relative aspect-[4/5] overflow-hidden sm:aspect-[16/9] lg:aspect-[2.6/1]">
+        <AnimatePresence mode="popLayout" initial={false}>
+          <motion.div
+            key={current.project.slug}
+            className="absolute inset-0"
+            initial={{ opacity: 0, scale: 1.06 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.9, ease }}
+          >
+            <Link href={`/works/${current.project.slug}`} className="group absolute inset-0 block">
+              <ImagePlaceholder src={current.image} alt="" sizes="(min-width: 1024px) 66vw, 100vw" className="absolute inset-0" imgClassName="transition-transform duration-[1600ms] ease-out group-hover:scale-105" />
+              <span className="absolute inset-0 bg-gradient-to-r from-ink/75 via-ink/10 to-transparent" aria-hidden="true" />
+              <span className="absolute inset-y-0 left-0 flex flex-col justify-center p-6 md:p-12">
+                <span className="mb-4 block h-px w-6 bg-bone/60" aria-hidden="true" />
+                <span className="display block max-w-[5.5em] text-6xl md:text-8xl">{current.project.title}</span>
+                <span className="label mt-5 flex items-center gap-3 text-bone/80">
+                  {current.project.format}
+                  <span className="h-px w-5 bg-bone/50" aria-hidden="true" />
+                  {current.project.year}
+                </span>
+              </span>
+              <span className="absolute bottom-6 right-6 grid h-12 w-12 place-items-center rounded-full border border-bone/70 transition-colors duration-500 group-hover:border-ember group-hover:bg-ember md:bottom-10 md:right-10" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                  <path d="M8 5v14l11-7z" />
+                </svg>
+              </span>
+            </Link>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {/* Controls */}
-      <div className="flex justify-between items-center mt-6 px-4">
-        <button
-          onClick={handlePrev}
-          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-        >
-          Prev
-        </button>
-        <button
-          onClick={handleNext}
-          className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-        >
-          Next
-        </button>
+      <div className="flex flex-col">
+        {sideTile(next, 1, "-mt-10 aspect-[6/5]")}
+        <div className="flex items-center justify-between gap-3 px-5 pt-5 sm:px-8 lg:justify-center lg:px-0">
+          <p className="label text-bone/60 lg:hidden" aria-live="polite">
+            {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+          </p>
+          <div className="flex gap-3">
+            <button type="button" onClick={() => go(-1)} aria-label="Previous project" className="grid h-11 w-11 place-items-center rounded-full border border-bone/50 transition-colors duration-300 hover:border-ember hover:bg-ember">
+              <Icon name="arrowLeft" size={16} />
+            </button>
+            <button type="button" onClick={() => go(1)} aria-label="Next project" className="grid h-11 w-11 place-items-center rounded-full border border-bone/50 transition-colors duration-300 hover:border-ember hover:bg-ember">
+              <Icon name="arrow" size={16} />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

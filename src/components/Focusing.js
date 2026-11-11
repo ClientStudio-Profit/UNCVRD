@@ -1,64 +1,46 @@
-"use client";
-import { useContext, useEffect, useState, useRef } from "react";
-import { ScrollContext } from "@/context/ScrollProvider";
-import Image from "next/image";
-// import focusBg from "@/assets/images/IMG_42671.jpg"; // replace with your image
-import logo from "@/assets/images/logo.png"; // replace with your logo
+import Link from "next/link";
+import VideoPlaceholder from "@/components/ui/VideoPlaceholder";
+import ArrowLink from "@/components/ui/ArrowLink";
+import { Reveal } from "@/components/ui/Reveal";
+import { services } from "@/data/services";
+import { media } from "@/data/site";
+
+// Home "What We Do": the five core services as a typographic index.
+const core = services.filter((s) => s.slug !== "other-services");
 
 export default function Focusing() {
-  const { scrollY } = useContext(ScrollContext);
-  const sectionRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const sectionTop = sectionRef.current?.offsetTop || 0;
-    const windowHeight = window.innerHeight;
-
-    if (scrollY + windowHeight >= sectionTop + 100) {
-      setIsVisible(true);
-    }
-  }, [scrollY]);
-
   return (
-    <section
-      ref={sectionRef}
-      className="relative h-[50vh] flex items-center justify-center overflow-hidden"
-    >
-      {/* Background Image */}
-      {/* <Image
-        src={focusBg}
-        alt="Background"
-        fill
-        className="object-cover z-0"
-        priority
-      /> */}
-      {/* Darker Overlay */}
-      <div className="absolute inset-0 bg-black/80 z-10" />
+    <section className="grain relative overflow-hidden border-y hairline bg-coal">
+      <div className="mx-auto grid w-full max-w-[1400px] grid-cols-1 gap-10 px-5 py-20 sm:px-8 lg:grid-cols-12 lg:items-center lg:gap-8 lg:px-14">
+        <Reveal className="lg:col-span-4">
+          <VideoPlaceholder src={media.showreel} poster={media.showreelPoster} title="UNCVRD Showreel" label="Showreel" sizes="(min-width: 1024px) 33vw, 100vw" className="aspect-[4/3]" />
+        </Reveal>
 
-      {/* Content */}
-      <div
-        className={`relative z-20 max-w-6xl w-full px-6 grid grid-cols-1 md:grid-cols-2 gap-6 items-center transition-opacity duration-1000 ${
-          isVisible ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        {/* Left: Logo */}
-        <div className="flex justify-center md:justify-start">
-          <Image
-            src={logo}
-            alt="Logo"
-            width={280}
-            height={280}
-            className="object-contain"
-          />
+        <div className="lg:col-span-5 lg:pl-8">
+          <Reveal as="h2" className="eyebrow mb-6" y={10}>
+            What We Do
+          </Reveal>
+          <ul>
+            {core.map((service, i) => (
+              <Reveal as="li" key={service.slug} delay={i * 0.07}>
+                <Link
+                  href={`/services/${service.slug}`}
+                  className="display group flex items-baseline gap-4 py-1 text-[clamp(3rem,6vw,5rem)] transition-[color,transform] duration-500 hover:translate-x-3 hover:text-ember"
+                >
+                  {service.title}
+                  <span className="label text-bone/0 transition-colors duration-500 group-hover:text-bone/60">{service.number}</span>
+                </Link>
+              </Reveal>
+            ))}
+          </ul>
         </div>
 
-        {/* Right: Text */}
-        <div className="text-white text-lg md:text-xl">
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-            efficitur sem sed sapien vulputate, ac tincidunt justo pharetra.
-          </p>
-        </div>
+        <Reveal className="lg:col-span-3" delay={0.2}>
+          <p className="max-w-xs text-sm leading-relaxed text-bone/75">From concept to final cut, we craft visual stories that connect, inspire, and leave a lasting impact.</p>
+          <ArrowLink href="/services" className="mt-4 text-ember hover:text-bone">
+            Explore services
+          </ArrowLink>
+        </Reveal>
       </div>
     </section>
   );
