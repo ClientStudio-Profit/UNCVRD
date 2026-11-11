@@ -61,3 +61,20 @@
   font-weight: 300;
   font-style: normal;
 }
+
+/* Display face — Extenda (already shipped in public/assets/fonts/extenda) */
+@font-face {
+  font-family: "Extenda";
+  src: url("/assets/fonts/extenda/Extenda-80-Peta-trial.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Extenda";
+  src: url("/assets/fonts/extenda/Extenda-40-Hecto-trial.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
