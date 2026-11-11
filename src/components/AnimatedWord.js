@@ -1,17 +1,17 @@
 "use client";
 import { motion } from "framer-motion";
 
-export default function AnimatedWord({ label, positionClass, delay, isRed }) {
+// Single word/label that fades up on load. Used for staggered hero details.
+export default function AnimatedWord({ label, delay = 0, className = "", as = "span" }) {
+  const Tag = motion[as] || motion.span;
   return (
-    <motion.div
-      className={`absolute ${positionClass} text-2xl font-semibold ${
-        isRed ? "text-red-500" : "text-white"
-      }`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay }}
+    <Tag
+      className={className}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
     >
       {label}
-    </motion.div>
+    </Tag>
   );
 }
